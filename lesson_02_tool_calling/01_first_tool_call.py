@@ -62,7 +62,7 @@ print("=" * 55)
 print("【第 1 次请求】模型看到 tools 说明书，决定怎么回应")
 print("=" * 55)
 r1 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=messages,
     tools=tools,        # 关键：工具说明书随请求发给模型
 )
@@ -111,7 +111,7 @@ print("=" * 55)
 print("【第 2 次请求】模型读到工具结果，生成最终回答")
 print("=" * 55)
 r2 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=messages,            # 此时历史已有 4 条：system/user/assistant(tool_calls)/tool
     tools=tools,
 )
@@ -125,7 +125,7 @@ print("=" * 55)
 print("【对照】同样的提问，但不给 tools —— 模型只能编")
 print("=" * 55)
 r3 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[
         {"role": "system", "content": "你是天气助手。"},
         {"role": "user", "content": "北京今天天气怎么样？"},

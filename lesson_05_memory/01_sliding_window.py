@@ -26,7 +26,7 @@ K = 4     # B 组窗口大小：system 之外最多保留 4 条
 
 
 def ask(messages):
-    r = client.chat.completions.create(model="deepseek-chat", messages=messages)
+    r = client.chat.completions.create(model="deepseek-v4-flash", messages=messages)
     return (r.choices[0].message.content, r.usage.prompt_tokens)
 
 

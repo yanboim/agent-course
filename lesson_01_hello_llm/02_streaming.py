@@ -27,7 +27,7 @@ question = "用 200 字解释：为什么说 Agent 的本质是'LLM 驱动的循
 # ---------- 先测非流式：记录总耗时 ----------
 t0 = time.time()
 r = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[{"role": "user", "content": question}],
 )
 full_text = r.choices[0].message.content
@@ -38,7 +38,7 @@ print(full_text[:60], "...\n")
 # ---------- 再测流式：记录"首字耗时"和总耗时 ----------
 t0 = time.time()
 stream = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[{"role": "user", "content": question}],
     stream=True,                       # 关键开关
 )

@@ -78,7 +78,7 @@ def run(task: str, max_turns: int = 6) -> str:
     ]
     for turn in range(1, max_turns + 1):
         r = client.chat.completions.create(
-            model="deepseek-chat", messages=messages, tools=tools,
+            model="deepseek-v4-flash", messages=messages, tools=tools,
         )
         m = r.choices[0].message
         finish = r.choices[0].finish_reason

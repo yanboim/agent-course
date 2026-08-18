@@ -60,7 +60,7 @@ python lesson_01_hello_llm/01_first_call.py
 
 ### 模型说明
 
-示例代码默认使用 `deepseek-chat`；个别实验使用 `deepseek-v4-flash`。
+示例代码统一使用 `deepseek-v4-flash`（写死显式模型名，避免官方滚动别名静默变更导致行为漂移）。
 换成任何 OpenAI 兼容服务（如 vLLM 自部署端点）只需改 `base_url` + `model`。
 
 ## 每课流程

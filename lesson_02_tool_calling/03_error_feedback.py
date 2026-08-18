@@ -48,7 +48,7 @@ def run(task: str) -> None:
     ]
     for turn in range(1, 5):
         r = client.chat.completions.create(
-            model="deepseek-chat", messages=messages, tools=tools,
+            model="deepseek-v4-flash", messages=messages, tools=tools,
         )
         m = r.choices[0].message
         messages.append({"role": "assistant", "content": m.content, "tool_calls": [
@@ -79,7 +79,7 @@ print("实验 2：有 tool_calls 却不回传 tool 消息（预期 API 400）")
 print("=" * 60)
 try:
     r1 = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         messages=[{"role": "user", "content": "查订单 A1024"}],
         tools=tools,
     )
@@ -87,7 +87,7 @@ try:
     print("模型第 1 步没问题，返回了 tool_calls:", [tc.function.name for tc in m.tool_calls])
     # 故意【不】append tool 消息，直接再问 —— 违反协议
     client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         messages=[
             {"role": "user", "content": "查订单 A1024"},
             {"role": "assistant", "content": m.content, "tool_calls": [

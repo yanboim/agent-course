@@ -36,7 +36,7 @@ def compress(old_messages):
     """把将被丢弃的旧消息压成一条摘要"""
     text = "\n".join(f"{m['role']}: {m['content']}" for m in old_messages)
     r = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         messages=[{"role": "user", "content": SUMMARY_PROMPT + text}],
         temperature=0,
     )
@@ -58,7 +58,7 @@ def run_dialog():
                          {"role": "user", "content": f"（此前对话摘要）\n{summary}"},
                          {"role": "assistant", "content": "好的，我记住了。"}] + recent)
             compressed = True
-        r = client.chat.completions.create(model="deepseek-chat", messages=messages)
+        r = client.chat.completions.create(model="deepseek-v4-flash", messages=messages)
         reply = r.choices[0].message.content
         messages.append({"role": "assistant", "content": reply})
         total_prompt += r.usage.prompt_tokens

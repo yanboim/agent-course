@@ -26,7 +26,7 @@ client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com",
 )
-MODEL = "deepseek-chat"
+MODEL = "deepseek-v4-flash"
 
 
 # ============ executor 用的计算器工具（同第 3 课） ============

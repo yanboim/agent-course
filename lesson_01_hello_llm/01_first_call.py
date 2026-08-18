@@ -35,7 +35,7 @@ messages = [
 ]
 
 response = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=messages,
     temperature=0.7,     # 采样随机性：0=几乎每次相同，越大越发散（0~2）
     # max_tokens=100,    # 可选：限制回复长度
@@ -64,7 +64,7 @@ print("实验：两连问，观察'带不带历史'的区别\n")
 
 # 第一问：告诉它名字
 r1 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[{"role": "user", "content": "我叫小明。请只回复'好的'。"}],
 )
 print("r1.choices[0].message.content",r1.choices[0].message.content)
@@ -72,14 +72,14 @@ print("第一问：我叫小明 ->", r1.choices[0].message.content.strip())
 
 # 第二问【不带历史】：全新的一次调用，模型根本不知道上一轮说过什么
 r2 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[{"role": "user", "content": "我叫什么名字？"}],
 )
 print("第二问（不带历史）：我叫什么名字？ ->", r2.choices[0].message.content.strip())
 
 # 第二问【带历史】：把上一轮的问答誊写进 messages 再问
 r3 = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=[
         {"role": "user", "content": "我叫小明。请只回复'好的'。"},
         {"role": "assistant", "content": r1.choices[0].message.content},

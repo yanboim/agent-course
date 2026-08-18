@@ -116,7 +116,7 @@ def run_agent(task: str, max_turns: int = 8) -> str:
                 {"role": "user", "content": task}]
     for turn in range(1, max_turns + 1):
         r = client.chat.completions.create(
-            model="deepseek-chat", messages=messages, tools=TOOLS)
+            model="deepseek-v4-flash", messages=messages, tools=TOOLS)
         m = r.choices[0].message
         messages.append({"role": "assistant", "content": m.content, "tool_calls": [
             {"id": tc.id, "type": "function",

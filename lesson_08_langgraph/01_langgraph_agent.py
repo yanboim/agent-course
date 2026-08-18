@@ -33,7 +33,7 @@ client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com",
 )
-MODEL = "deepseek-chat"
+MODEL = "deepseek-v4-flash"
 
 # ==================== 工具（与第 3 课相同） ====================
 OPS = {ast.Add: lambda a, b: a + b, ast.Sub: lambda a, b: a - b,

@@ -81,7 +81,7 @@ def answer_with_rag(question: str) -> str:
         print(f"   [{rank}] 重排分{rr:.3f}/相似度{sim:.3f}  {doc[:38]}")
     context = "\n".join(f"[{i}] {doc}" for i, (_, _, doc) in enumerate(hits, 1))
     r = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         temperature=0,
         messages=[
             {"role": "system",
@@ -96,7 +96,7 @@ def answer_with_rag(question: str) -> str:
 def answer_without_rag(question: str) -> str:
     """对照组：不给资料直接问 —— 模型只能瞎猜（这些是私有事实）"""
     r = client.chat.completions.create(
-        model="deepseek-chat", temperature=0,
+        model="deepseek-v4-flash", temperature=0,
         messages=[{"role": "user", "content": question}],
     )
     return r.choices[0].message.content

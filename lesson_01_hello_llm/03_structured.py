@@ -43,7 +43,7 @@ messages = [
 ]
 
 response = client.chat.completions.create(
-    model="deepseek-chat",
+    model="deepseek-v4-flash",
     messages=messages,
     temperature=0,                                   # 抽取任务要稳定，用 0
     response_format={"type": "json_object"},         # DeepSeek 支持，强制输出合法 JSON
