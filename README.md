@@ -15,32 +15,67 @@
 - [ ] **第 7 课** `lesson_07_multi_agent` —— 多 Agent 协作（planner / executor / reviewer）
 - [ ] **第 8 课** `lesson_08_langgraph` —— 用 LangGraph 重写第 3 课的 Agent，理解框架到底解决了什么
 
-## 环境（服务器：Ubuntu 26.04 @ 192.168.0.111）
+## 快速开始（从零跑起来）
 
-课程项目位于 `/workspace/build/course/agent-course`（workspace 根为 `/workspace/build/course`）：
-
-- Python 3.14.4（系统）+ 独立虚拟环境 `.venv/`（由 uv 创建）
-- 依赖：openai 3.2.0、python-dotenv（走阿里 PyPI 镜像，直连无需代理）
-- API：DeepSeek（OpenAI 兼容接口），key 在 `.env`
-
-### 日常使用
+### 1. 克隆仓库
 
 ```bash
-ssh root@192.168.0.111
-cd /workspace/build/course/agent-course
-source .venv/bin/activate          # 激活虚拟环境（每次登录后执行一次）
-python lesson_01_hello_llm/01_first_call.py   # 运行示例
+git clone https://github.com/yanboim/agent-course.git
+cd agent-course
 ```
 
-### 管理依赖（需要加包时）
+### 2. 准备 Python 环境（3.10+，推荐 [uv](https://docs.astral.sh/uv/)）
 
 ```bash
-uv pip install <包名> --index-url https://mirrors.aliyun.com/pypi/simple/
+# 安装 uv（Linux/macOS；已有任意虚拟环境工具可跳过）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+uv venv .venv
+source .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
 ```
+
+### 3. 安装依赖
+
+```bash
+uv pip install -r requirements.txt --index-url https://mirrors.aliyun.com/pypi/simple/
+# 或普通 pip：pip install -r requirements.txt
+```
+
+### 4. 配置 API Key（本课程用 DeepSeek，OpenAI 兼容接口）
+
+```bash
+cp .env.example .env
+# 编辑 .env，填入你的 key（获取：https://platform.deepseek.com -> API Keys）
+```
+
+> 安全提醒：`.env` 已被 `.gitignore` 排除，永远不要把它提交进仓库。
+
+### 5. 跑通第一课
+
+```bash
+python lesson_01_hello_llm/01_first_call.py
+```
+
+看到"无记忆实验"的三连问输出，环境就绪。
+
+### 模型说明
+
+示例代码默认使用 `deepseek-chat`；个别实验使用 `deepseek-v4-flash`。
+换成任何 OpenAI 兼容服务（如 vLLM 自部署端点）只需改 `base_url` + `model`。
 
 ## 每课流程
 
 1. 读该课 `README.md`（课后复习用，讲解以对话为主）
 2. 依次运行、阅读带注释的示例代码
-3. 完成课末练习
+3. 完成课末练习（做完才算过关）
 4. 有任何看不懂的地方随时问
+
+## 课程主线（一句话版）
+
+1～3 课揭示 Agent 本质：**LLM 驱动的循环**（无状态 → 工具协议 → while 循环）；
+4～7 课补生产拼图：安全、记忆、检索、协作；
+第 8 课拆穿框架：LangGraph 只是把你的 `while` 画成了图。
+
+## License
+
+[MIT](./LICENSE) —— 教学代码随意取用，欢迎 Star / PR / 提 Issue。

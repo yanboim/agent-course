@@ -25,10 +25,7 @@
 ## 安装与运行
 
 ```bash
-cd /workspace/build/course/agent-course
-source .venv/bin/activate
-uv pip install langgraph --index-url https://mirrors.aliyun.com/pypi/simple/
-
+# 依赖已包含在仓库根目录 requirements.txt（langgraph）
 cd lesson_08_langgraph
 python 01_langgraph_agent.py
 ```
