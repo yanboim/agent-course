@@ -85,7 +85,7 @@ def read_file(path: str) -> str:
 
 
 TOOL_FUNCS = {"calculate": calculate, "web_search": web_search,
-              "get_current_time": get_current_time}
+              "get_current_time": get_current_time,"read_file":read_file}
 
 # ==================== 二、工具说明书（模型的目录） ====================
 TOOLS = [

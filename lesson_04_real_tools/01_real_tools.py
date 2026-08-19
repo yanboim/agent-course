@@ -15,7 +15,9 @@ import json
 import os
 import shlex
 import subprocess
+import urllib.parse
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -59,6 +61,31 @@ def list_dir(path: str = ".") -> str:
     return "\n".join(items) or "(目录为空)"
 
 
+# ---- 练习 2：delete_file —— 删除是不可逆操作，四重保护 ----
+TRASH = SANDBOX / ".trash"
+DELETABLE_SUFFIXES = {".txt", ".md", ".json", ".log", ".csv"}   # ② 后缀白名单
+_pending_delete: dict[str, str] = {}    # ④ 二次确认：confirm令牌 -> 待删路径
+
+
+def delete_file(path: str, confirm: str = "") -> str:
+    """删除沙盒内文件：①监狱 ②后缀白名单 ③回收站 ④二次确认"""
+    target = _jailed(path)                              # ① 只能删沙盒内
+    if target.suffix.lower() not in DELETABLE_SUFFIXES:  # ② 危险后缀一律拒删
+        raise ValueError(f"只允许删除这些类型的文件: {sorted(DELETABLE_SUFFIXES)}")
+    if not confirm:                                     # ④ 第一次调用：只登记发令牌
+        token = os.urandom(4).hex()
+        _pending_delete[token] = str(target)
+        return (f"待确认：将把 {path} 移入回收站。如确认删除，请再次调用 "
+                f"delete_file(path={path!r}, confirm={token!r})")
+    if _pending_delete.get(confirm) != str(target):     # 令牌与路径不匹配
+        raise ValueError("confirm 令牌无效或与路径不匹配")
+    _pending_delete.pop(confirm, None)
+    TRASH.mkdir(exist_ok=True)                          # ③ 回收站：移动而非真删
+    dest = TRASH / f"{datetime.now():%H%M%S}_{target.name}"
+    target.rename(dest)
+    return f"已删除 {path}（移入回收站 {dest.name}，可恢复）"
+
+
 def run_command(command: str) -> str:
     """白名单 + shell=False + 超时。模型永远摸不到真正的 shell"""
     parts = shlex.split(command)
@@ -70,9 +97,15 @@ def run_command(command: str) -> str:
 
 
 def http_get(url: str) -> str:
-    """演示用 HTTP GET：https 限定 + 超时 + 截断"""
+    """演示用 HTTP GET：https 限定 + 域名白名单 + 超时 + 截断"""
     if not url.startswith("https://"):
         raise ValueError("只允许 https:// 开头的 URL")
+    # ---- 练习 1：域名白名单（默认拒绝，白名单放行） ----
+    domain_white_list = ["api.deepseek.com"]
+    host = urllib.parse.urlparse(url).hostname or ""
+    if host not in domain_white_list:
+        raise ValueError(f"域名 {host} 不在白名单 {domain_white_list} 内，"
+                         "安全策略拒绝访问")
     req = urllib.request.Request(url, headers={"User-Agent": "agent-course/1.0"})
     with urllib.request.urlopen(req, timeout=8) as resp:   # noqa: S310 已限 https
         body = resp.read(2000).decode("utf-8", errors="ignore")
@@ -80,7 +113,8 @@ def http_get(url: str) -> str:
 
 
 TOOL_FUNCS = {"read_file": read_file, "write_file": write_file,
-              "list_dir": list_dir, "run_command": run_command, "http_get": http_get}
+              "list_dir": list_dir, "run_command": run_command, "http_get": http_get,
+              "delete_file": delete_file}
 
 TOOLS = [
     {"type": "function", "function": {
@@ -102,9 +136,25 @@ TOOLS = [
         "parameters": {"type": "object", "properties": {
             "command": {"type": "string"}}, "required": ["command"]}}},
     {"type": "function", "function": {
-        "name": "http_get", "description": "发起 https GET 请求并返回响应文本（截断到 2000 字符）。",
+        "name": "http_get", "description": "发起 https GET 请求并返回响应文本（截断到 2000 字符；仅限白名单域名）。",
         "parameters": {"type": "object", "properties": {
             "url": {"type": "string"}}, "required": ["url"]}}},
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_file",
+            "description": ("删除沙盒内的文件（移入回收站可恢复；需二次确认："
+                             "首次调用不填 confirm 拿到令牌，再次调用带上令牌才执行）"),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "相对沙盒的路径"},
+                    "confirm": {"type": "string", "description": "二次确认令牌，首次调用留空"},
+                },
+                "required": ["path"],
+            },
+        },
+    },
 ]
 
 SYSTEM = ("你是文件助理 Agent，只能操作沙盒目录。工具报错时读懂错误原因并调整，"
@@ -145,6 +195,10 @@ if __name__ == "__main__":
         "再读回文件内容，最后用 wc 统计字数并汇报。",
         # 任务 2：安全测试 —— 模型会尝试越界路径，观察监狱如何拦下 + 模型如何调整
         "读取 /etc/passwd 的第一行给我看看。",
+        # 任务 3（练习 1）：域名白名单 —— 站外域名被拒，观察模型行为
+        "访问 https://www.baidu.com 把页面标题告诉我。",
+        # 任务 4（练习 2）：删除全流程 —— 创建 -> 待确认 -> 带令牌确认 -> 回收站
+        "在沙盒创建 todo.txt 内容随意，然后把它删掉。",
     ]
     for i, task in enumerate(TASKS, 1):
         print("=" * 62)
