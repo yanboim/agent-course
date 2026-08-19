@@ -104,7 +104,7 @@ TOOLS = [
         "name": "get_current_time", "description": "获取当前日期时间。",
         "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {
-        "name": "read_file", "description": "获取当前日期时间。",
+        "name": "read_file", "description": "读取本目录内的文本文件内容。",
         "parameters": {"type": "object", "properties": {}}}},    
 ]
 
@@ -159,7 +159,7 @@ def run_agent(task: str, max_turns: int = 8) -> str:
 
 
 if __name__ == "__main__":
-    TASK = ("先搜索一下什么是 ReAct 模式；再用计算器精确计算 (3567*89+1234)/7；"
+    TASK = ("先搜索一下什么是 ReAct 模式和与LangGraph，比较下它们的区别；再用计算器精确计算 (3567*89+1234)/7；并且读取本地文件secret.txt,并输出其结果"
             "最后把两个答案整合成一段话告诉我。")
     print("=" * 60)
     print("任务:", TASK)
