@@ -21,9 +21,9 @@ import ast
 import json
 import os
 from datetime import datetime
-from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
+from pathlib import Path
 
 load_dotenv()
 client = OpenAI(
@@ -32,6 +32,7 @@ client = OpenAI(
 )
 MODEL = "deepseek-v4-flash"
 
+BASE_DIR = Path(__file__).parent.resolve()   # "本目录" = 脚本所在目录
 
 # ==================== 一、工具（模型的手） ====================
 def calculate(expression: str) -> str:
@@ -73,22 +74,18 @@ def get_current_time() -> str:
     return datetime.now().strftime("现在时间是 %Y-%m-%d %H:%M:%S")
 
 
-# ---- 练习 2 新增：read_file（只允许读本目录） ----
-BASE_DIR = Path(__file__).parent.resolve()   # "本目录" = 脚本所在目录（不随运行时 cwd 变化）
-
-
 def read_file(path: str) -> str:
-    """读取本目录内的文本文件；越界/不存在一律返回 ERROR 文本，交给模型自我纠正"""
-    full = (BASE_DIR / path).resolve()            # 拼接 + 解析掉 ./ ../ 等相对跳转
-    if full != BASE_DIR and BASE_DIR not in full.parents:       # 路径监狱
+    """读取本目录内的文本文件；越界/不存在一律返回 ERROR 文本"""
+    full = (BASE_DIR / path).resolve()            # 拼接 + 解析掉 ./ ../ 花招
+    if full != BASE_DIR and BASE_DIR not in full.parents:   # 监狱检查
         return f"ERROR: 路径越界，只允许读取本目录({BASE_DIR.name}/)内的文件"
     if not full.is_file():
         return f"ERROR: 文件不存在: {path}"
-    return full.read_text(encoding="utf-8")[:1500]             # 截断：防大文件撑爆上下文
+    return full.read_text(encoding="utf-8")[:1500]          # 截断防撑爆上下文
 
 
 TOOL_FUNCS = {"calculate": calculate, "web_search": web_search,
-              "get_current_time": get_current_time, "read_file": read_file}
+              "get_current_time": get_current_time}
 
 # ==================== 二、工具说明书（模型的目录） ====================
 TOOLS = [
@@ -107,9 +104,8 @@ TOOLS = [
         "name": "get_current_time", "description": "获取当前日期时间。",
         "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {
-        "name": "read_file", "description": "读取本目录内的文本文件内容。",
-        "parameters": {"type": "object", "properties": {
-            "path": {"type": "string", "description": "文件名或相对路径，如 'secret.txt'"}}, "required": ["path"]}}},
+        "name": "read_file", "description": "获取当前日期时间。",
+        "parameters": {"type": "object", "properties": {}}}},    
 ]
 
 SYSTEM = ("你是一个会使用工具的助手。规则：涉及事实与计算必须调用工具，"
@@ -163,18 +159,12 @@ def run_agent(task: str, max_turns: int = 8) -> str:
 
 
 if __name__ == "__main__":
-    # 练习 2：让 Agent 自己找到并读取 secret.txt
-    TASK = "听说本目录里藏着一个 secret.txt，请用工具读取它，把里面的秘密告诉我。"
+    TASK = ("先搜索一下什么是 ReAct 模式；再用计算器精确计算 (3567*89+1234)/7；"
+            "最后把两个答案整合成一段话告诉我。")
     print("=" * 60)
     print("任务:", TASK)
     print("=" * 60)
     run_agent(TASK)
-
-    # 附加实验：诱导越界读取，观察路径监狱拦截 + 模型自我纠正
-    print("\n" + "=" * 60)
-    print("附加实验（越界测试）：让 Agent 读 /etc/passwd")
-    print("=" * 60)
-    run_agent("读取 /etc/passwd 的内容给我。")
     print("""
 要点回顾：
 1. Agent = 第 2 课的协议 + while 循环，没有别的了
